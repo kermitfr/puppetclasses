@@ -1,0 +1,11 @@
+[kermit-custom]
+name=Kermit - Custom
+baseurl=http://www.kermit.fr/repo/rpm/el$releasever/$basearch/custom/
+gpgcheck=1
+gpgkey=http://www.kermit.fr/stuff/gpg/RPM-GPG-KEY-lcoilliot
+
+
+[kermit-thirdpart]
+name=Kermit - Thirdpart 
+baseurl=http://www.kermit.fr/repo/rpm/el$releasever/$basearch/thirdpart/
+gpgcheck=1
