@@ -1,0 +1,4 @@
+[jboss]
+name=jboss 
+baseurl=http://www.kermit.fr/repo/rpm/el$releasever/$basearch/jboss/
+gpgcheck=0
