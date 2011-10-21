@@ -1,12 +1,30 @@
 class mcollective {
     package { "mcollective-common":
-        ensure => installed
+        ensure => installed,
+        require => File["/etc/yum.repos.d/kermit.repo"],
     }
 
     package { "mcollective":
         ensure => installed,
         require => Package["mcollective-common"]
     }
+
+    file { "/etc/mcollective/ssl":
+        ensure  => 'directory',
+        mode   => 0755,
+        owner  => root,
+        group  => root,
+        require => Package["mcollective-common"]
+    }
+
+    file { "/etc/mcollective/ssl/clients":
+        ensure  => 'directory',
+        mode   => 0755,
+        owner  => root,
+        group  => root,
+        require => File["/etc/mcollective/ssl"]
+    }
+    
 
     file { "/etc/mcollective/server.cfg":
         ensure => present,
@@ -56,7 +74,8 @@ class mcollective {
         owner  => root,
         group  => root,
         source => "puppet:///modules/mcollective/noc-public.pem",
-        require => Package["mcollective-common"],
+        require => [ Package["mcollective-common"], 
+                     File["/etc/mcollective/ssl/clients"] ],
     }
 
     service { "mcollective":
