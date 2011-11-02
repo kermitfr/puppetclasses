@@ -4,11 +4,12 @@
 #
 # chkconfig:    345 15 84
 #
-# description:  mcollective lets you build powerful Stomp compatible middleware
-# clients in ruby without having to worry too
-#               much about all the setup and management of a Stomp connection,
-#               it also provides stats, logging and so forth
-#               as a bonus.
+# description: JBoss Application Server is the most widely used
+# Java application server on the market. A J2EE certified platform
+# for developing and deploying enterprise Java applications, Web
+# applications, and Portals, JBoss Application Server provides the
+# full range of J2EE features as well as extended enterprise
+# services including clustering, caching, and persistence
 #
 ### BEGIN INIT INFO
 # Provides:          jboss 
