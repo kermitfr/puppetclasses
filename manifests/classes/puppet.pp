@@ -1,12 +1,12 @@
 class puppet {
     package { "puppet": 
-            ensure => installed 
+        ensure => installed,
     }
 
     service { "puppet":
-        ensure => running,
-        enable => true,
-        require => Package["puppet"]
+        ensure  => running,
+        enable  => true,
+        require => Package["puppet"],
     }
 }
 
