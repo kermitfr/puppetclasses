@@ -1,4 +1,5 @@
-import "classes/*"
+$recvnode = 'el5'
+$nocnode  = 'el5'
 
 node default {
     include yum
