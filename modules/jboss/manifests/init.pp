@@ -1,4 +1,4 @@
-class jboss {
+class jboss($up = true) {
     $jbossver = '6.1.0.Final'
 
     file { 'jboss.repo':
@@ -65,8 +65,8 @@ class jboss {
 
     service{ 'jboss':
         require   => [ File['jboss_service'], Package['jbossas'], ],
-        enable    => true,
-        ensure    => running,
+        ensure    => $up? { true => running, default => stopped },
+        enable    => $up? { true => true,    default => false   },
         hasstatus => false,
     }
 }
