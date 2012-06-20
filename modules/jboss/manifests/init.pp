@@ -3,7 +3,7 @@ class jboss($up = true) {
 
     yumrepo { "jboss":
        baseurl   =>
-         "http://www.kermit.fr/repo/rpm/el\$releasever/\$basearch/jboss/",
+         'http://www.kermit.fr/repo/rpm/el$releasever/$basearch/jboss/',
        descr     => "JBoss",
        enabled   => 1,
        gpgcheck  => 0,
