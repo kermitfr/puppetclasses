@@ -1,52 +1,68 @@
 class kermit {
-    file { "/etc/kermit/":
-      ensure => directory,
+    
+    include yum
+
+    file { '/etc/kermit/':
+      ensure  => directory,
     }
 
-    file { "/etc/kermit/ssl/":
-      ensure => directory,
-      require => File["/etc/kermit/"],
+    file { '/etc/kermit/ssl/':
+      require => File['/etc/kermit/'],
+      ensure  => directory,
     }
 
-    file { "/etc/kermit/ssl/q-private.pem":
+    file { '/etc/kermit/ssl/q-private.pem':
+        require => [ File['/etc/kermit/ssl/'], Package['mcollective-common'] ],
         ensure => $hostname ? {
             $recvnode => absent,
-            default => present,
+            default   => present,
         },
-        mode   => 644,
-        owner  => root,
-        group  => root,
-        source => "puppet:///modules/kermit/q-private.pem",
-        require => [File["/etc/kermit/ssl/"], Package["mcollective-common"]],
+        mode    => 644,
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///kermit/q-private.pem',
     }
 
-    file { "/etc/kermit/kermit.cfg":
-        ensure => present, 
-        mode   => 644,
-        owner  => root,
-        group  => root,
-        source => "puppet:///modules/kermit/kermit.cfg",
-        require => File["/etc/kermit/"],
+    file { '/etc/kermit/kermit.cfg':
+        require => File['/etc/kermit/'],
+        ensure  => present, 
+        mode    => 644,
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///kermit/kermit.cfg',
     }
 
-    file { "/etc/kermit/amqpqueue.cfg":
-        ensure => present, 
-        mode   => 644,
-        owner  => root,
-        group  => root,
-        source => "puppet:///modules/kermit/amqpqueue.cfg",
-        require => File["/etc/kermit/"],
+    file { '/etc/kermit/amqpqueue.cfg':
+        require => File['/etc/kermit/'],
+        ensure  => present, 
+        mode    => 644,
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///kermit/amqpqueue.cfg',
     }
 
+    $mcoreq_packages = [ 'kermit-gpg_key_whs', 'kermit-mqsend',
+        'rubygem-curb', 'rubygem-inifile', 'rubygem-json',
+        'rubygem-xml-simple', 'rubygem-ruby-rpm', 'rubygem-rubyzip' ] 
 
-    package { "kermit-gpg_key_whs": 
-        ensure => installed,
-        require => File["/etc/yum.repos.d/kermit.repo"], 
+    package { $mcoreq_packages: 
+        require => Yumrepo['kermit-custom', 'kermit-thirdpart'],
+        ensure  => present,
     }
 
-    package { "kermit-mqsend": 
-        ensure => installed,
-        require => File["/etc/yum.repos.d/kermit.repo"], 
+    file { '/usr/local/bin/kermit':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+    }
+
+    file { '/usr/local/bin/kermit/queue':
+        require => File['/usr/local/bin/kermit'],
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
     }
 }
 

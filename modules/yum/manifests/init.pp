@@ -1,17 +1,20 @@
 class yum {
-    file { "/etc/yum.repos.d/kermit.repo":
-       ensure => present,
-       mode   => 644,
-       owner  => root,
-       group  => root,
-       source => "puppet:///modules/yum/kermit.repo"
+    yumrepo { 'kermit-custom' :
+	baseurl  =>
+          'http://www.kermit.fr/repo/rpm/el$releasever/$basearch/custom/', 
+        descr    => 'Kermit - Custom',
+        enabled  => 1,
+        gpgcheck => 1,
+        gpgkey   => 'http://www.kermit.fr/stuff/gpg/RPM-GPG-KEY-lcoilliot',
     }
-    file { "/etc/yum.repos.d/a7x.repo":
-       ensure => present,
-       mode   => 644,
-       owner  => root,
-       group  => root,
-       source => "puppet:///modules/yum/a7x.repo"
+ 
+    yumrepo { 'kermit-thirdpart' :
+        baseurl  => 
+          'http://www.kermit.fr/repo/rpm/el$releasever/$basearch/thirdpart/',
+        descr    => 'Kermit - thirdpart',
+        enabled  => 1,
+        gpgcheck => 1,
+        gpgkey   => 'http://www.kermit.fr/stuff/gpg/RPM-GPG-KEY-lcoilliot', 
     }
 }
 

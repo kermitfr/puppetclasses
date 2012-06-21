@@ -1,12 +1,40 @@
 class puppet {
-    package { "puppet": 
-        ensure => installed,
+    $rubyshadow = $operatingsystem ? {
+        'Ubuntu'  => 'libshadow-ruby1.8',
+        default   => 'ruby-shadow',
     }
 
-    service { "puppet":
-        ensure  => running,
-        enable  => true,
-        require => Package["puppet"],
+    package { 'ruby-shadow':
+        name      => $rubyshadow,
+        ensure    => installed,
+    }
+
+    package { 'puppet': 
+        ensure    => installed, 
+    }
+
+    service { 'puppet':
+        require   => Package['puppet'],
+        ensure    => running,
+        enable    => true,
+        subscribe => File['/etc/puppet/puppet.conf'],
+    }
+
+    file { '/etc/puppet/puppet.conf':
+        ensure    => present,
+        source    => 'puppet:///puppet/puppet.conf',
+        owner     => 'root',
+        group     => 'root',
+        mode      => 0644,
+    }
+
+
+    file{"/var/lib/puppet/pupenv.txt":
+       owner    => root,
+       group    => root,
+       mode     => 444,
+       loglevel => debug,
+       content  => inline_template("<%= scope.to_hash['environment'] %>")
     }
 }
 

@@ -1,121 +1,128 @@
 class mcollective {
-    package { "mcollective-common":
-        ensure  => installed,
-        require => File["/etc/yum.repos.d/kermit.repo"],
-    }
-
-    package { "mcollective":
-        require => Package["mcollective-common"]
-        ensure  => installed,
-    }
-
-    file { "/etc/mcollective/ssl":
-        require => Package["mcollective-common"]
-        ensure  => 'directory',
-        mode    => '0755',
-        owner   => 'root',
-        group   => 'root',
-    }
-
-    file { "/etc/mcollective/ssl/clients":
-        ensure  => 'directory',
-        mode    => '0755',
-        owner   => 'root',
-        group   => 'root',
-        require => File["/etc/mcollective/ssl"]
-    }
     
-
-    file { "/etc/mcollective/server.cfg":
-        require => Package["mcollective-common"],
-        ensure  => present,
-        mode    => '0640',
-        owner   => 'root',
-        group   => 'root',
-        source  => "puppet:///modules/mcollective/server.cfg",
+    include yum
+   
+    package { 'mcollective-common':
+        ensure   => present,
+        require  => Yumrepo['kermit-custom', 'kermit-thirdpart'],
     }
 
-    file { "/etc/mcollective/client.cfg":
-        require => Package["mcollective-common"],
-        ensure  => $hostname ? {
+    package { 'mcollective':
+        ensure   => installed,
+        require  => Package['mcollective-common'],
+    }
+
+    file { '/etc/mcollective/ssl':
+        ensure  => 'directory',
+        mode    => 0755,
+        owner   => root,
+        group   => root,
+        require => Package['mcollective-common'],
+    }
+
+    file { '/etc/mcollective/ssl/clients':
+        ensure  => 'directory',
+        mode    => 0755,
+        owner   => root,
+        group   => root,
+        require => File['/etc/mcollective/ssl'],
+    }
+
+    file{"/etc/mcollective/facts.yaml":
+        owner    => root,
+        group    => root,
+        mode     => 400,
+        loglevel => debug,  # this is needed to avoid it being logged
+                            # and reported on every run
+        # avoid including highly-dynamic facts
+        # as they will cause unnecessary template writes
+        content  => inline_template("<%= scope.to_hash.reject { |k,v| k.to_s =~ /(uptime|timestamp|memory|free|swap)/ }.to_yaml %>")
+    }
+
+    file { '/etc/mcollective/server.cfg':
+        ensure       => present,
+        mode         => 0640,
+        owner        => root,
+        group        => root,
+        source       => 'puppet:///mcollective/server.cfg',
+        require      => Package['mcollective-common'],
+    }
+
+    file { '/etc/mcollective/client.cfg':
+        ensure => $hostname ? {
             $nocnode => present,
             default  => absent,
         },
-        mode    => '0644',
-        owner   => 'root',
-        group   => 'root',
-        source  => "puppet:///modules/mcollective/client.cfg",
+        mode    => 0644,
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///mcollective/client.cfg',
+        require => Package['mcollective-common'],
     }
 
-    file { "/etc/mcollective/ssl/server-private.pem":
+    file { '/etc/mcollective/ssl/server-private.pem':
         ensure  => present,
-        mode    => '0640',
-        owner   => 'root',
-        group   => 'root',
-        source  => "puppet:///modules/mcollective/server-private.pem",
-        require => Package["mcollective-common"],
+        mode    => 0640,
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///mcollective/server-private.pem',
+        require => Package['mcollective-common'],
     }
 
-    file { "/etc/mcollective/ssl/server-public.pem":
-        require => Package["mcollective-common"],
-        ensure  => present,
-        mode    => $hostname ? {
-            $nocnode => '0644',
-            default  => '0640',
+    file { '/etc/mcollective/ssl/server-public.pem':
+        ensure => present,
+        mode   => $hostname ? {
+            $nocnode => 0644,
+            default  => 0640,
         },
-        owner   => 'root',
-        group   => 'root',
-        source  => "puppet:///modules/mcollective/server-public.pem",
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///mcollective/server-public.pem',
+        require => Package['mcollective-common'],
     }
 
-    file { "/etc/mcollective/ssl/clients/noc-public.pem":
-        require => [ Package["mcollective-common"], 
-                     File["/etc/mcollective/ssl/clients"] ],
+    file { '/etc/mcollective/ssl/clients/noc-public.pem':
         ensure  => present,
-        mode    => '0644',
-        owner   => 'root',
-        group   => 'root',
-        source  => "puppet:///modules/mcollective/noc-public.pem",
+        mode    => 0644,
+        owner   => root,
+        group   => root,
+        source  => 'puppet:///mcollective/noc-public.pem',
+        require => [ Package['mcollective-common'], 
+                     File['/etc/mcollective/ssl/clients'] ],
     }
 
-    service { "mcollective":
+    service { 'mcollective':
         ensure  => running,
         enable  => true,
-        require => [ Package["mcollective"],
-                     File["/etc/mcollective/server.cfg"],
-                     File["/etc/mcollective/ssl/server-public.pem"],
-                     File["/etc/mcollective/ssl/server-private.pem"],
-                     File["/etc/mcollective/ssl/clients/noc-public.pem"] ]
+        require => [ Package['mcollective'],
+                     File['/etc/mcollective/server.cfg',
+                          '/etc/mcollective/ssl/server-public.pem',
+                          '/etc/mcollective/ssl/server-private.pem',
+                          '/etc/mcollective/ssl/clients/noc-public.pem'], ],
     }
 
-    package { "mcollective-plugins-agentinfo":
+    $mcoplug_packages = [ 'mcollective-plugins-agentinfo',
+      'mcollective-plugins-nodeinfo', 'mcollective-plugins-facter_facts',
+      'mcollective-plugins-package',  'mcollective-plugins-service' ] 
+
+    package { $mcoplug_packages:
         ensure  => installed,
-        require => [ File["/etc/yum.repos.d/kermit.repo"],
-                     Package["mcollective-common"]],
+        require => [ Yumrepo['kermit-custom', 'kermit-thirdpart'],
+                     Package['mcollective-common'], ],
     }
 
-    package { "mcollective-plugins-nodeinfo":
-        ensure  => installed,
-        require => [ File["/etc/yum.repos.d/kermit.repo"],
-                     Package["mcollective-common"]],
+    $agentsrc = $hostname ? {
+        $nocnode => undef,
+        default  => 'puppet:///mcoagents',
     }
 
-    package { "mcollective-plugins-facter_facts":
-        ensure  => installed,
-        require => [ File["/etc/yum.repos.d/kermit.repo"],
-                     Package["mcollective-common"]],
-    }
-
-    package { "mcollective-plugins-package":
-        ensure  => installed,
-        require => [ File["/etc/yum.repos.d/kermit.repo"],
-                     Package["mcollective-common"]],
-    }
-
-    package { "mcollective-plugins-service":
-        ensure  => installed,
-        require => [ File["/etc/yum.repos.d/kermit.repo"],
-                     Package["mcollective-common"]],
+    file { '/usr/libexec/mcollective/mcollective/agent':
+          ensure  => directory,
+          recurse => true,   # <- That's all needed --v 
+          source  => $agentsrc,
+          owner   => 'root',
+          group   => 'root',
+          require => Package['mcollective-common'],
     }
 
 }
