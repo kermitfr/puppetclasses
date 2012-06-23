@@ -20,7 +20,7 @@ class kermit {
         mode    => 644,
         owner   => root,
         group   => root,
-        source  => 'puppet:///kermit/q-private.pem',
+        source  => 'puppet:///modules/kermit/q-private.pem',
     }
 
     file { '/etc/kermit/kermit.cfg':
@@ -29,7 +29,7 @@ class kermit {
         mode    => 644,
         owner   => root,
         group   => root,
-        source  => 'puppet:///kermit/kermit.cfg',
+        source  => 'puppet:///modules/kermit/kermit.cfg',
     }
 
     file { '/etc/kermit/amqpqueue.cfg':
@@ -38,7 +38,7 @@ class kermit {
         mode    => 644,
         owner   => root,
         group   => root,
-        source  => 'puppet:///kermit/amqpqueue.cfg',
+        source  => 'puppet:///modules/kermit/amqpqueue.cfg',
     }
 
     $mcoreq_packages = [ 'kermit-gpg_key_whs', 'kermit-mqsend',

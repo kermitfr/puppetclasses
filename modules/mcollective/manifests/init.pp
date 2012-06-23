@@ -44,7 +44,7 @@ class mcollective {
         mode         => 0640,
         owner        => root,
         group        => root,
-        source       => 'puppet:///mcollective/server.cfg',
+        source       => 'puppet:///modules/mcollective/server.cfg',
         require      => Package['mcollective-common'],
     }
 
@@ -56,7 +56,7 @@ class mcollective {
         mode    => 0644,
         owner   => root,
         group   => root,
-        source  => 'puppet:///mcollective/client.cfg',
+        source  => 'puppet:///modules/mcollective/client.cfg',
         require => Package['mcollective-common'],
     }
 
@@ -65,7 +65,7 @@ class mcollective {
         mode    => 0640,
         owner   => root,
         group   => root,
-        source  => 'puppet:///mcollective/server-private.pem',
+        source  => 'puppet:///modules/mcollective/server-private.pem',
         require => Package['mcollective-common'],
     }
 
@@ -77,7 +77,7 @@ class mcollective {
         },
         owner   => root,
         group   => root,
-        source  => 'puppet:///mcollective/server-public.pem',
+        source  => 'puppet:///modules/mcollective/server-public.pem',
         require => Package['mcollective-common'],
     }
 
@@ -86,7 +86,7 @@ class mcollective {
         mode    => 0644,
         owner   => root,
         group   => root,
-        source  => 'puppet:///mcollective/noc-public.pem',
+        source  => 'puppet:///modules/mcollective/noc-public.pem',
         require => [ Package['mcollective-common'], 
                      File['/etc/mcollective/ssl/clients'] ],
     }
@@ -113,7 +113,7 @@ class mcollective {
 
     $agentsrc = $hostname ? {
         $nocnode => undef,
-        default  => 'puppet:///mcoagents',
+        default  => 'puppet:///modules/mcoagents',
     }
 
     file { '/usr/libexec/mcollective/mcollective/agent':
